@@ -18,6 +18,10 @@ return new class extends Migration {
 
             $table->foreign('order_id')->references('order_id')->on('orders')->cascadeOnDelete();
             $table->foreign('video_id')->references('video_id')->on('videos')->cascadeOnDelete();
+
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });                                                     
     }
 

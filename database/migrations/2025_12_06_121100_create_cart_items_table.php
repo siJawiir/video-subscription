@@ -21,6 +21,10 @@ return new class extends Migration
 
             $table->foreign('cart_id')->references('cart_id')->on('carts')->cascadeOnDelete();
             $table->foreign('video_id')->references('video_id')->on('videos')->cascadeOnDelete();
+
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
     }

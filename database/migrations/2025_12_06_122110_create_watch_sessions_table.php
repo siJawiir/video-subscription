@@ -21,6 +21,10 @@ return new class extends Migration {
             $table->softDeletes();
 
             $table->foreign('video_access_id')->references('video_access_id')->on('video_access')->cascadeOnDelete();
+
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
     }
 

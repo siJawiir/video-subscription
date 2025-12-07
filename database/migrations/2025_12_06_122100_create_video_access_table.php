@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->integer('purchased_time_seconds');
             $table->integer('used_time_seconds')->default(0);
             $table->integer('remaining_time_seconds');
-            $table->tinyInteger('status')->default(1); // 1:active,2:blocked,3:expired
+            $table->tinyInteger('status')->default(1); // 0:blocked,1:active,3:expired
             $table->timestamp('activated_at')->nullable();
 
             $table->timestamps();

@@ -12,11 +12,16 @@ return new class extends Migration {
             $table->unsignedBigInteger('video_category_id');
 
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('video_id')->references('video_id')->on('videos')->cascadeOnDelete();
             $table->foreign('video_category_id')->references('video_category_id')->on('video_categories')->cascadeOnDelete();
 
             $table->unique(['video_id', 'video_category_id']);
+
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
     }
 
