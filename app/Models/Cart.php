@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+
 class Cart extends BaseModel
 {
     protected $primaryKey = 'cart_id';
@@ -24,3 +26,4 @@ class Cart extends BaseModel
         return $this->hasMany(CartItem::class, 'cart_id', 'cart_id');
     }
 }
+

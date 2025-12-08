@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+
 class CartItem extends BaseModel
 {
     protected $primaryKey = 'cart_item_id';

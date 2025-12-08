@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+
 class VideoTag extends BaseModel
 {
     protected $primaryKey = 'video_tag_id';

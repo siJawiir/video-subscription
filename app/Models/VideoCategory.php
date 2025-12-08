@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+
 class VideoCategory extends BaseModel
 {
     protected $primaryKey = 'video_category_id';
