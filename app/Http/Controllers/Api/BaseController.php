@@ -37,12 +37,14 @@ class BaseController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'List retrieved successfully',
-            'data' => $collection->toArray($request),
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'last_page' => $paginator->lastPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
+            'data' => [
+                'data' => $collection->toArray($request),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                ],
             ],
         ]);
     }
