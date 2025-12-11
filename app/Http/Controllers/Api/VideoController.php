@@ -15,9 +15,23 @@ class VideoController extends BaseController
 {
     public function index(Request $request)
     {
-        $search     = $request->query('search');
-        $categoryId = $request->query('category_id');
-        $tagId      = $request->query('tag_id');
+        $search       = $request->query('search');
+        $categoryId   = $request->query('category_id');
+        $tagId        = $request->query('tag_id');
+
+        $currentPage  = (int) $request->query('current_page', 1);
+        $perPage      = (int) $request->query('per_page', 10);
+        $sortBy       = $request->query('sort_by', 'created_at');
+        $orderBy      = $request->query('order_by', 'desc');
+        
+        if (!in_array(strtolower($orderBy), ['asc', 'desc'])) {
+            $orderBy = 'desc';
+        }
+
+        $allowedSort = ['title', 'created_at', 'updated_at'];
+        if (!in_array($sortBy, $allowedSort)) {
+            $sortBy = 'created_at';
+        }
 
         $query = Video::query()
             ->where('is_active', 1)
@@ -38,10 +52,17 @@ class VideoController extends BaseController
                     $sub->where('video_tags.video_tag_id', $tagId);
                 });
             })
-            ->orderByDesc('created_at');
+
+            ->orderBy($sortBy, $orderBy);
+
+        $request->merge([
+            'page'    => $currentPage,
+            'perPage' => $perPage,
+        ]);
 
         return $this->paginatedResponse($query, $request, VideoResource::class);
     }
+
 
     public function resources(Request $request)
     {
