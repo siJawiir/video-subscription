@@ -15,11 +15,35 @@ class VideoTagController extends BaseController
 {
     public function index(Request $request)
     {
+        $currentPage = (int) $request->query('current_page', 1);
+        $perPage     = (int) $request->query('per_page', 10);
+        $sortBy      = $request->query('sort_by', 'created_at');
+        $orderBy     = $request->query('order_by', 'desc');
+        $search      = $request->query('search');
+
+        if (!in_array(strtolower($orderBy), ['asc', 'desc'])) {
+            $orderBy = 'desc';
+        }
+
+        $allowedSort = ['name', 'created_at', 'updated_at'];
+        if (!in_array($sortBy, $allowedSort)) {
+            $sortBy = 'created_at';
+        }
+
         $query = VideoTag::query()
-            ->when($request->filled('search'), fn($q) => $q->where('name', 'like', "%{$request->search}%"));
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy($sortBy, $orderBy);
+
+        $request->merge([
+            'page'    => $currentPage,
+            'perPage' => $perPage,
+        ]);
 
         return $this->paginatedResponse($query, $request, VideoTagResource::class);
     }
+
 
     public function show(int $id)
     {
