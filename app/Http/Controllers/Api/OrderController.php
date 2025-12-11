@@ -6,6 +6,8 @@ use App\Enums\OrderStatus;
 use App\Enums\VideoAccessStatus;
 use App\Http\Controllers\Api\BaseController;
 use App\Models\Order;
+use App\Models\Video;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Enums\HttpStatus;
 use App\Http\Resources\OrderResource;
@@ -61,6 +63,64 @@ class OrderController extends BaseController
         return $this->paginatedResponse($query, $request, OrderResource::class);
     }
 
+    public function popularVideos(Request $request)
+    {
+        $oneWeekAgo = now()->subDays(7);
+
+        $popular = OrderItem::query()
+            ->whereHas('order', function ($q) use ($oneWeekAgo) {
+                $q->where('status', OrderStatus::Approved->value)
+                    ->where('created_at', '>=', $oneWeekAgo);
+            })
+            ->select('video_id', DB::raw('COUNT(*) as order_count'))
+            ->groupBy('video_id')
+            ->orderByDesc('order_count')
+            ->with(['video.categories', 'video.tags'])
+            ->limit(10)
+            ->get()
+            ->map(function ($item) {
+                $video = $item->video;
+
+                return [
+                    'video_id'      => $video->video_id,
+                    'title'         => $video->title,
+                    'description'   => $video->description,
+                    'video_url'     => $video->video_url,
+                    'thumbnail_url' => $video->thumbnail_url ?? null,
+                    'price'         => $video->price,
+                    'categories'    => $video->categories,
+                    'tags'          => $video->tags,
+                    'order_count'   => $item->order_count,
+                ];
+            });
+
+        return $this->successResponse($popular, "Popular videos last week");
+    }
+
+    public function popularVideoCategories(Request $request)
+    {
+        $oneWeekAgo = now()->subDays(7);
+
+        $categories = DB::table('order_items')
+            ->join('orders', 'orders.order_id', '=', 'order_items.order_id')
+            ->join('video_category_map', 'video_category_map.video_id', '=', 'order_items.video_id')
+            ->join('video_categories', 'video_categories.video_category_id', '=', 'video_category_map.video_category_id')
+            ->where('orders.status', OrderStatus::Approved->value)
+            ->where('orders.created_at', '>=', $oneWeekAgo)
+            ->select(
+                'video_categories.video_category_id',
+                'video_categories.name',
+                'video_categories.description',
+                DB::raw('COUNT(*) as order_count')
+            )
+            ->groupBy('video_categories.video_category_id', 'video_categories.name', 'video_categories.description')
+            ->orderByDesc('order_count')
+            ->limit(10)
+            ->get();
+
+        return $this->successResponse($categories, "Popular categories last week");
+    }
+
 
     public function show($id)
     {
@@ -75,6 +135,40 @@ class OrderController extends BaseController
             'Order details retrieved successfully'
         );
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'video_id' => 'required|exists:videos,video_id',
+            'duration_seconds' => 'required|integer|min:1',
+        ]);
+
+        $user = $request->user();
+        $video = Video::findOrFail($request->video_id);
+        $price = $video->price * $request->duration_seconds;
+
+        $order = DB::transaction(function () use ($user, $video, $request, $price) {
+            $order = $user->orders()->create([
+                'status' => OrderStatus::Pending->value,
+                'total_amount' => $price,
+            ]);
+
+            $order->items()->create([
+                'video_id' => $video->video_id,
+                'duration_seconds' => $request->duration_seconds,
+                'price' => $price,
+            ]);
+
+            return $order;
+        });
+
+        return $this->successResponse(
+            new OrderResource($order->load('items.video')),
+            'Order created successfully',
+            HttpStatus::CREATED->value
+        );
+    }
+
 
     public function approve($id)
     {

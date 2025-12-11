@@ -37,9 +37,50 @@ class VideoController extends BaseController
                 $q->whereHas('tags', function ($sub) use ($tagId) {
                     $sub->where('video_tags.video_tag_id', $tagId);
                 });
-            });
+            })
+            ->orderByDesc('created_at');
 
         return $this->paginatedResponse($query, $request, VideoResource::class);
+    }
+
+    public function resources(Request $request)
+    {
+        $search = $request->query('search');
+
+        $query = Video::query()
+            ->where('is_active', 1)
+            ->when($search, function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%");
+            })
+            ->orderByDesc('created_at')
+            ->limit(10);
+
+        $videos = $query->get();
+
+        $data = $videos->map(function ($video) {
+            return [
+                'value' => $video->video_id,
+                'label' => $video->title,
+            ];
+        });
+
+        return $this->successResponse($data, "Video resources retrieved successfully");
+    }
+
+
+    public function latest(Request $request)
+    {
+        $latestVideos = Video::query()
+            ->where('is_active', 1)
+            ->with(['categories', 'tags'])
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        return $this->successResponse(
+            VideoResource::collection($latestVideos),
+            "Latest 10 videos retrieved successfully"
+        );
     }
 
     public function show($id)

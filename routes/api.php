@@ -17,8 +17,22 @@ use App\Http\Controllers\Api\VideoTagController;
 // ====== Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
 Route::get('/videos', [VideoController::class, 'index']);
 Route::get('/videos/{id}', [VideoController::class, 'show']);
+Route::get('popular-videos', [OrderController::class, 'popularVideos']);
+Route::get('/latest-videos', [VideoController::class, 'latest']);
+Route::get('/video-resources', [VideoController::class, 'resources']);
+
+
+Route::get('/video-categories', [VideoCategoryController::class, 'index']);
+Route::get('/video-categories/{id}', [VideoCategoryController::class, 'show']);
+Route::get('/popular-video-categories', [OrderController::class, 'popularVideoCategories']);
+Route::get('/video-category-resources', [VideoCategoryController::class, 'resources']);
+
+Route::get('/video-tags', [VideoTagController::class, 'index']);
+Route::get('/video-tags/{id}', [VideoTagController::class, 'show']);
+
 
 
 // ====== Authenticated Routes
@@ -31,13 +45,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Cart
     Route::get('/cart', [CartController::class, 'show']);
     Route::post('/cart/add', [CartController::class, 'addItem']);
-    Route::post('/cart/update', [CartController::class, 'updateItem']);
+    Route::put('/cart/update', [CartController::class, 'updateItem']);
     Route::post('/cart/remove', [CartController::class, 'removeItem']);
     Route::post('/cart/checkout', [CartController::class, 'checkout']);
 
     // Customer Orders
     Route::get('/my-orders', [CustomerOrderController::class, 'index']);
     Route::get('/my-orders/{id}', [CustomerOrderController::class, 'show']);
+
+    Route::post('/orders', [OrderController::class, 'store']);
 
     // Video Access
     Route::get('/video-access', [VideoAccessController::class, 'index']);
@@ -60,14 +76,10 @@ Route::middleware([
     Route::put('/videos/{id}', [VideoController::class, 'update']);
     Route::delete('/videos/{id}', [VideoController::class, 'destroy']);
 
-    Route::get('/video-categories', [VideoCategoryController::class, 'index']);
-    Route::get('/video-categories/{id}', [VideoCategoryController::class, 'show']);
     Route::post('/video-categories', [VideoCategoryController::class, 'store']);
     Route::put('/video-categories/{id}', [VideoCategoryController::class, 'update']);
     Route::delete('/video-categories/{id}', [VideoCategoryController::class, 'destroy']);
 
-    Route::get('/video-tags', [VideoTagController::class, 'index']);
-    Route::get('/video-tags/{id}', [VideoTagController::class, 'show']);
     Route::post('/video-tags', [VideoTagController::class, 'store']);
     Route::put('/video-tags/{id}', [VideoTagController::class, 'update']);
     Route::delete('/video-tags/{id}', [VideoTagController::class, 'destroy']);
@@ -80,6 +92,7 @@ Route::middleware([
 ])->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
+
     Route::post('/orders/{id}/approve', [OrderController::class, 'approve']);
     Route::post('/orders/{id}/reject', [OrderController::class, 'reject']);
 });

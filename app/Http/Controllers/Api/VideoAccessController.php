@@ -14,12 +14,11 @@ class VideoAccessController extends BaseController
     public function index(Request $request)
     {
         $search     = $request->query('search');
-        $status     = $request->query('status');
+        // $status     = $request->query('status');
 
         $query = VideoAccess::query()
             ->where('user_id', $request->user()->user_id)
-            ->with('video')
-
+            ->where('status', VideoAccessStatus::Active->value)->with('video')
             ->when($search, function ($q) use ($search) {
                 $q->whereHas(
                     'video',
@@ -28,9 +27,8 @@ class VideoAccessController extends BaseController
                 );
             })
 
-            ->when($status, function ($q) use ($status) {
-                $q->where('status', $status);
-            })
+
+
 
             ->orderByDesc('activated_at');
 
@@ -45,6 +43,7 @@ class VideoAccessController extends BaseController
     {
         $videoAccess = VideoAccess::with('video')
             ->where('user_id', $request->user()->user_id)
+            ->where('status', VideoAccessStatus::Active->value)
             ->find($id);
 
         if (!$videoAccess) {

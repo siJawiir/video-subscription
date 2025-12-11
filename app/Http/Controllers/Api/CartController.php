@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BaseController;
 use App\Http\Requests\AddCartItemRequest;
 use App\Http\Requests\RemoveCartItemRequest;
 use App\Http\Resources\CartResource;
+use App\Http\Resources\CartItemResource;
 use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use App\Models\Cart;
@@ -60,8 +61,9 @@ class CartController extends BaseController
             $cartItem = $cartItems[$video->video_id];
             $cartItem->increment('duration_seconds', $request->duration_seconds);
             $cartItem->increment('price', $video->price * $request->duration_seconds);
+            $cartItem->refresh();
         } else {
-            $cart->items()->create([
+            $cartItem = $cart->items()->create([
                 'video_id' => $video->video_id,
                 'duration_seconds' => $request->duration_seconds,
                 'price' => $video->price * $request->duration_seconds,
@@ -69,7 +71,7 @@ class CartController extends BaseController
         }
 
         return $this->successResponse(
-            new CartResource($cart->fresh('items.video')),
+            new CartItemResource($cartItem->load('video')),
             'Item added to cart successfully'
         );
     }
@@ -94,10 +96,11 @@ class CartController extends BaseController
         ]);
 
         return $this->successResponse(
-            new CartResource($cart->load('items.video')),
+            new CartItemResource($cartItem->load('video')),
             'Cart item updated successfully'
         );
     }
+
 
 
     public function removeItem(RemoveCartItemRequest $request)

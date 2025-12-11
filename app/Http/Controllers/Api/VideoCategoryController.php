@@ -21,6 +21,29 @@ class VideoCategoryController extends BaseController
         return $this->paginatedResponse($query, $request, VideoCategoryResource::class);
     }
 
+    public function resources(Request $request)
+    {
+        $search = $request->query('search');
+
+        $query = VideoCategory::query()
+            ->where('deleted_at', null)
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })
+            ->orderByDesc('created_at');
+
+        $categories = $query->get();
+
+        $data = $categories->map(function ($category) {
+            return [
+                'value' => $category->video_category_id,
+                'label' => $category->name,
+            ];
+        });
+
+        return $this->successResponse($data, "Video category resources retrieved successfully");
+    }
+
     public function show(int $id)
     {
         $category = VideoCategory::findOrFail($id);

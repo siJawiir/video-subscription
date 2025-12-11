@@ -23,11 +23,11 @@ class VideoResource extends BaseResource
             'price'       => $this->price,
             'is_active'   => $this->is_active,
             'categories'  => $this->categories->map(fn($c) => [
-                'id' => $c->video_category_id,
+                'video_category_id' => $c->video_category_id,
                 'name' => $c->name,
             ])->values(),
             'tags'        => $this->tags->map(fn($t) => [
-                'id' => $t->video_tag_id,
+                'video_tag_id' => $t->video_tag_id,
                 'name' => $t->name,
             ])->values(),
         ];
