@@ -14,7 +14,7 @@ return [
 
     'allowed_origins' => [
         'http://localhost:3000',
-        'https://nontonpilem.vercel.app',
+        'https://nonton-pilem.vercel.app',
     ],
 
     'allowed_origins_patterns' => [],
