@@ -32,6 +32,7 @@ Route::get('/video-category-resources', [VideoCategoryController::class, 'resour
 
 Route::get('/video-tags', [VideoTagController::class, 'index']);
 Route::get('/video-tags/{id}', [VideoTagController::class, 'show']);
+Route::get('/video-tag-resources', [VideoTagController::class, 'resources']);
 
 
 

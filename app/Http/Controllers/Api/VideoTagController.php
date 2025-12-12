@@ -44,6 +44,29 @@ class VideoTagController extends BaseController
         return $this->paginatedResponse($query, $request, VideoTagResource::class);
     }
 
+    public function resources(Request $request)
+    {
+        $search = $request->query('search');
+
+        $query = VideoTag::query()
+            ->where('deleted_at', null)
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })
+            ->orderByDesc('created_at');
+
+        $tags = $query->get();
+
+        $data = $tags->map(function ($tag) {
+            return [
+                'value' => $tag->video_tag_id,
+                'label' => $tag->name,
+            ];
+        });
+
+        return $this->successResponse($data, "Video tag resources retrieved successfully");
+    }
+
 
     public function show(int $id)
     {
