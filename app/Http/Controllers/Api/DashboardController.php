@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Api\BaseController;
 use App\Models\Order;
 use App\Enums\HttpStatus;
-use App\Http\Resources\OrderResource;
+use App\Models\Video;
 
 class DashboardController extends BaseController
 {
