@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\VideoAccessController;
 use App\Http\Controllers\Api\WatchSessionController;
 use App\Http\Controllers\Api\CustomerOrderController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\RedisTestController;
 use App\Http\Controllers\Api\VideoCategoryController;
 use App\Http\Controllers\Api\VideoTagController;
@@ -67,6 +68,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // ======== Admin Routes - requires auth and has abilities
+
+// Dashboard Management
+Route::middleware([
+    'auth:sanctum',
+    'abilities:dashboard'
+])->group(function () {
+    Route::post('/dashboard-stats', [DashboardController::class, 'stats']);
+});
+
 
 // Video Management
 Route::middleware([
