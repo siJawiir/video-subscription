@@ -74,7 +74,7 @@ Route::middleware([
     'auth:sanctum',
     'abilities:dashboard'
 ])->group(function () {
-    Route::post('/dashboard-stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard-stats', [DashboardController::class, 'stats']);
 });
 
 
