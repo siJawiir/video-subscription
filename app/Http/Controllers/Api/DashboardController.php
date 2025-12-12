@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Api\BaseController;
 use App\Models\Order;
 use App\Enums\HttpStatus;
+use App\Enums\OrderStatus;
 use App\Models\Video;
 
 class DashboardController extends BaseController
@@ -14,9 +15,9 @@ class DashboardController extends BaseController
     {
         $totalVideos = Video::count();
 
-        $pendingOrders = Order::where('status', 'pending')->count();
-        $approvedOrders = Order::where('status', 'approved')->count();
-        $rejectedOrders = Order::where('status', 'rejected')->count();
+        $pendingOrders = Order::where('status',OrderStatus::Pending->value )->count();
+        $approvedOrders = Order::where('status', OrderStatus::Approved->value)->count();
+        $rejectedOrders = Order::where('status', OrderStatus::Rejected->value)->count();
 
         $payload = [
             'total_videos' => $totalVideos,
