@@ -13,31 +13,57 @@ class VideoAccessController extends BaseController
 {
     public function index(Request $request)
     {
-        $search     = $request->query('search');
-        // $status     = $request->query('status');
+        $search      = $request->query('search');
+        $categoryId  = $request->query('category_id');
+        $tagId       = $request->query('tag_id');
+
+        $currentPage = (int) $request->query('current_page', 1);
+        $perPage     = (int) $request->query('per_page', 10);
+        $sortBy      = $request->query('sort_by', 'activated_at');
+        $orderBy     = $request->query('order_by', 'desc');
+
+        if (!in_array(strtolower($orderBy), ['asc', 'desc'])) {
+            $orderBy = 'desc';
+        }
+
+        $allowedSort = ['activated_at', 'created_at', 'updated_at'];
+        if (!in_array($sortBy, $allowedSort)) {
+            $sortBy = 'activated_at';
+        }
 
         $query = VideoAccess::query()
             ->where('user_id', $request->user()->user_id)
-            ->where('status', VideoAccessStatus::Active->value)->with('video')
+            ->where('status', VideoAccessStatus::Active->value)
+            ->with(['video.categories', 'video.tags'])
+
             ->when($search, function ($q) use ($search) {
-                $q->whereHas(
-                    'video',
-                    fn($v) =>
-                    $v->where('title', 'like', "%{$search}%")
-                );
+                $q->whereHas('video', function ($v) use ($search) {
+                    $v->where('title', 'like', "%{$search}%");
+                });
             })
 
+            ->when($categoryId, function ($q) use ($categoryId) {
+                $q->whereHas('video.categories', function ($sub) use ($categoryId) {
+                    $sub->where('video_categories.video_category_id', $categoryId);
+                });
+            })
 
+            ->when($tagId, function ($q) use ($tagId) {
+                $q->whereHas('video.tags', function ($sub) use ($tagId) {
+                    $sub->where('video_tags.video_tag_id', $tagId);
+                });
+            })
 
+            ->orderBy($sortBy, $orderBy);
 
-            ->orderByDesc('activated_at');
+        $request->merge([
+            'page'    => $currentPage,
+            'perPage' => $perPage,
+        ]);
 
-        return $this->paginatedResponse(
-            $query,
-            $request,
-            VideoAccessResource::class
-        );
+        return $this->paginatedResponse($query, $request, VideoAccessResource::class);
     }
+
 
     public function show(Request $request, $id)
     {
